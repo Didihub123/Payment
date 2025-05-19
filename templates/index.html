@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistem Pembayaran</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sistem Pembayaran</h2>
+        <div>
+            <input type="text" id="amount" placeholder="Masukkan nominal pembayaran">
+            <button onclick="submitPayment()">Kirim</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function submitPayment() {
+            const amount = document.getElementById('amount').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!amount) {
+                resultDiv.innerHTML = "Mohon masukkan nominal pembayaran";
+                resultDiv.className = "error";
+                return;
+            }
+
+            // Disable button and show loading
+            const button = document.querySelector('button');
+            button.disabled = true;
+            button.innerHTML = 'Memproses...';
+            resultDiv.innerHTML = "Sedang memproses pembayaran...";
+            resultDiv.className = "";
+
+            // Submit form
+            const formData = new FormData();
+            formData.append('amount', amount);
+
+            fetch('/process', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = "Pembayaran berhasil diproses! Silakan cek Telegram untuk informasi QR Code.";
+                    resultDiv.className = "success";
+                } else {
+                    resultDiv.innerHTML = "Error: " + data.message;
+                    resultDiv.className = "error";
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = "Error: " + error;
+                resultDiv.className = "error";
+            })
+            .finally(() => {
+                // Re-enable button
+                button.disabled = false;
+                button.innerHTML = 'Kirim';
+            });
+        }
+    </script>
+</body>
+</html>
